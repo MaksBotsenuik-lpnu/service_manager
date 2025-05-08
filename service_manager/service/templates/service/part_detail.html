@@ -1,0 +1,103 @@
+{% extends 'service/base.html' %}
+{% load i18n %}
+
+{% block page_title %}Part Details: {{ part.name }}{% endblock %}
+
+{% block page_actions %}
+<div class="btn-toolbar mb-2 mb-md-0">
+    <div class="btn-group me-2">
+        <a href="{% url 'service:part-update' part.pk %}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit Part
+        </a>
+        <a href="{% url 'service:part-delete' part.pk %}" class="btn btn-danger">
+            <i class="fas fa-trash"></i> Delete Part
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block service_content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Part Information</h5>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Type</dt>
+                    <dd class="col-sm-9">{{ part.get_part_type_display }}</dd>
+
+                    <dt class="col-sm-3">Brand</dt>
+                    <dd class="col-sm-9">{{ part.brand }}</dd>
+
+                    <dt class="col-sm-3">Name</dt>
+                    <dd class="col-sm-9">{{ part.name }}</dd>
+
+                    <dt class="col-sm-3">Price</dt>
+                    <dd class="col-sm-9">${{ part.price }}</dd>
+
+                    <dt class="col-sm-3">Stock</dt>
+                    <dd class="col-sm-9">{{ part.stock_quantity }}</dd>
+
+                    <dt class="col-sm-3">Status</dt>
+                    <dd class="col-sm-9">{{ part.get_status_display }}</dd>
+
+                    <dt class="col-sm-3">Description</dt>
+                    <dd class="col-sm-9">{{ part.description|linebreaks }}</dd>
+
+                    <dt class="col-sm-3">Added On</dt>
+                    <dd class="col-sm-9">{{ part.created_at|date:"F j, Y" }}</dd>
+
+                    <dt class="col-sm-3">{% trans "Reserved Parts" %}</dt>
+                    <dd class="col-sm-9">{{ part.reserved_parts }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Usage History</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Repair Order</th>
+                                <th>Device</th>
+                                <th>Quantity</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for usage in part.partusage_set.all %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'service:repair-order-detail' usage.repair_order.pk %}">
+                                        #{{ usage.repair_order.id }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{% url 'service:device-detail' usage.repair_order.device.pk %}">
+                                        {{ usage.repair_order.device.brand }} {{ usage.repair_order.device.model }}
+                                    </a>
+                                </td>
+                                <td>{{ usage.quantity }}</td>
+                                <td>{{ usage.created_at|date:"M d, Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No usage history found for this part.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

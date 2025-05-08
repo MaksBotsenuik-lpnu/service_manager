@@ -1,0 +1,148 @@
+{% extends 'service/base.html' %}
+{% load i18n %}
+{% load multiply %}
+
+{% block page_title %}{% trans "Repair Order" %} #{{ repair_order.id }}{% endblock %}
+
+{% block page_heading %}{% trans "Repair Order" %} #{{ repair_order.id }}{% endblock %}
+
+{% block page_actions %}
+<div class="btn-toolbar mb-2 mb-md-0">
+    <div class="btn-group me-2">
+        {% if repair_order.pk %}
+        <a href="{% url 'service:repair-order-update' repair_order.pk %}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> {% trans "Edit Order" %}
+        </a>
+        <a href="{% url 'service:repair-order-delete' repair_order.pk %}" class="btn btn-danger">
+            <i class="fas fa-trash"></i> {% trans "Delete Order" %}
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block service_content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header bg-transparent">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">{% trans "Status" %}</h5>
+                    <span class="badge bg-{{ repair_order.status|yesno:'success,warning' }}">
+                        {{ repair_order.get_status_display }}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    {% trans "Created" %}: {{ repair_order.created_at|date:"F j, Y" }}
+                    {% if repair_order.completed_at %}
+                    | {% trans "Completed" %}: {{ repair_order.completed_at|date:"F j, Y" }}
+                    {% endif %}
+                </p>
+
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">{% trans "Order Details" %}</h5>
+                        <dl class="row">
+                            <dt class="col-sm-3">{% trans "Client" %}</dt>
+                            <dd class="col-sm-9">
+                                {% if repair_order.client and repair_order.client.pk %}
+                                <a href="{% url 'service:client-detail' repair_order.client.pk %}" class="text-decoration-none">
+                                    {{ repair_order.client.get_full_name }}
+                                </a>
+                                {% else %}
+                                <span class="text-muted">{% trans "No client assigned" %}</span>
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-sm-3">{% trans "Device" %}</dt>
+                            <dd class="col-sm-9">
+                                {% if repair_order.device and repair_order.device.pk %}
+                                <a href="{% url 'service:device-detail' repair_order.device.pk %}" class="text-decoration-none">
+                                    {{ repair_order.device.brand }} {{ repair_order.device.model }}
+                                </a>
+                                {% else %}
+                                <span class="text-muted">{% trans "No device assigned" %}</span>
+                                {% endif %}
+                            </dd>
+
+                            <dt class="col-sm-3">{% trans "Description" %}</dt>
+                            <dd class="col-sm-9">{{ repair_order.description|linebreaks|default:"—" }}</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header bg-transparent">
+                        <h5 class="card-title mb-0">{% trans "Services" %}</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{% trans "Service" %}</th>
+                                        <th>{% trans "Price" %}</th>
+                                        <th>{% trans "Status" %}</th>
+                                        <th>{% trans "Actions" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for ros in repair_order.order_services.all %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'service:service-detail' ros.service.pk %}" class="text-decoration-none">
+                                                {{ ros.service.name }}
+                                            </a>
+                                        </td>
+                                        <td>${{ ros.service.price }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ ros.status|yesno:'success,warning' }}">
+                                                {{ ros.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <!-- Edit button removed: no URL pattern defined -->
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="fas fa-tools fa-2x mb-3"></i>
+                                                <p>{% trans "No services added to this order." %}</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-transparent">
+                <h5 class="card-title mb-0">{% trans "Actions" %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    {% if repair_order.pk %}
+                    <a href="{% url 'service:repair-order-update' repair_order.pk %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>{% trans "Edit Order" %}
+                    </a>
+                    <a href="{% url 'service:repair-order-delete' repair_order.pk %}" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>{% trans "Delete Order" %}
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

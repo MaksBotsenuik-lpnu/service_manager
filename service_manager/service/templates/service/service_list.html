@@ -1,0 +1,74 @@
+{% extends 'service/base.html' %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Services" %}{% endblock %}
+
+{% block page_heading %}{% trans "Services" %}{% endblock %}
+
+{% block page_actions %}
+<div class="btn-toolbar mb-2 mb-md-0">
+    <a href="{% url 'service:service-create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> {% trans "Add Service" %}
+    </a>
+</div>
+{% endblock %}
+
+{% block service_content %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>{% trans "Name" %}</th>
+                <th>{% trans "Description" %}</th>
+                <th>{% trans "Price" %}</th>
+                <th>{% trans "Estimated Time" %}</th>
+                <th>{% trans "Status" %}</th>
+                <th>{% trans "Actions" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for service in services %}
+            <tr>
+                <td>
+                    <a href="{% url 'service:service-detail' service.pk %}" class="text-decoration-none">
+                        {{ service.name }}
+                    </a>
+                </td>
+                <td>
+                    <small class="text-muted">{{ service.description|truncatewords:20|default:"—" }}</small>
+                </td>
+                <td>${{ service.price }}</td>
+                <td>{{ service.estimated_time }}</td>
+                <td>
+                    <span class="badge bg-{{ service.is_active|yesno:'success,warning' }}">
+                        {{ service.is_active|yesno:_('Active,Inactive') }}
+                    </span>
+                </td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <a href="{% url 'service:service-update' service.pk %}" class="btn btn-sm btn-outline-primary" title="{% trans 'Edit' %}">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{% url 'service:service-delete' service.pk %}" class="btn btn-sm btn-outline-danger" title="{% trans 'Delete' %}">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center py-4">
+                    <div class="text-muted">
+                        <i class="fas fa-cogs fa-2x mb-3"></i>
+                        <p>{% trans "No services found." %}</p>
+                        <a href="{% url 'service:service-create' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> {% trans "Add your first service" %}
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %} 

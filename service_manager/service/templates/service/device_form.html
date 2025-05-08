@@ -1,0 +1,87 @@
+{% extends 'service/base.html' %}
+{% load i18n %}
+
+{% block page_title %}
+    {% if form.instance.pk %}
+        {% trans "Edit Device" %}
+    {% else %}
+        {% trans "New Device" %}
+    {% endif %}
+{% endblock %}
+
+{% block page_heading %}
+    {% if form.instance.pk %}
+        {% trans "Edit Device" %}
+    {% else %}
+        {% trans "New Device" %}
+    {% endif %}
+{% endblock %}
+
+{% block service_content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-light">
+                <h5 class="card-title mb-0">
+                    {% if form.instance.pk %}
+                        {% trans "Edit Device Information" %}
+                    {% else %}
+                        {% trans "Create New Device" %}
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {{ field.label }}
+                                {% if field.field.required %}
+                                    <span class="text-danger">*</span>
+                                {% endif %}
+                            </label>
+                            {{ field.errors }}
+                            {{ field }}
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'service:device-list' %}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-times"></i> {% trans "Cancel" %}
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            {% if form.instance.pk %}
+                                {% trans "Save Changes" %}
+                            {% else %}
+                                {% trans "Create Device" %}
+                            {% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+    
+    .text-danger {
+        color: #dc3545;
+    }
+</style>
+{% endblock %} 

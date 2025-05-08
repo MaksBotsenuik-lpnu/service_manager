@@ -1,0 +1,288 @@
+{% extends 'service/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-lg-2 d-none d-lg-block bg-light sidebar py-4">
+            <div class="position-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item mb-2">
+                        <a class="nav-link" href="{% url 'service:client-list' %}">{% trans "Clients" %}</a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link" href="{% url 'service:device-list' %}">{% trans "Devices" %}</a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link" href="{% url 'service:repair-order-list' %}">{% trans "Repair Orders" %}</a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link" href="{% url 'service:service-list' %}">{% trans "Services" %}</a>
+                    </li>
+                    <li class="nav-item mb-2">
+                        <a class="nav-link" href="{% url 'service:part-list' %}">{% trans "Parts" %}</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-transparent">
+                    <h2 class="h4 mb-0">
+                        {% if form.instance.pk %}{% trans "Edit Repair Order" %}{% else %}{% trans "New Repair Order" %}{% endif %}
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Client & Device -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-transparent">
+                                <h3 class="h5 mb-0">{% trans "Client & Device" %}</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="{{ form.client.id_for_label }}" class="form-label required">{% trans "Client" %}</label>
+                                    {{ form.client }}
+                                    {% if form.client.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.client.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="mb-3">
+                                    <label for="{{ form.device.id_for_label }}" class="form-label required">{% trans "Device" %}</label>
+                                    {{ form.device }}
+                                    {% if form.device.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.device.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Services -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-transparent">
+                                <h3 class="h5 mb-0">{% trans "Services" %}</h3>
+                            </div>
+                            <div class="card-body">
+                                {{ formset.management_form }}
+                                <div id="services-container">
+                                    {% for form in formset %}
+                                        <div class="card mb-3 service-form">
+                                            <div class="card-body">
+                                                <div class="row g-3">
+                                                    <div class="col-md-10">
+                                                        <label class="form-label required">{% trans "Service" %}</label>
+                                                        <select name="order_services-{{ forloop.counter0 }}-service" id="id_order_services-{{ forloop.counter0 }}-service" class="form-control">
+                                                            {% for value, label in form.service.field.choices %}
+                                                                <option value="{{ value }}" {% if form.service.value == value %}selected{% endif %}>{{ label }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        {% if form.service.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {% for error in form.service.errors %}{{ error }}{% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="col-md-2 d-flex align-items-end">
+                                                        <button type="button" class="btn btn-danger d-block w-100 remove-service" title="{% trans 'Remove Service' %}">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" name="order_services-{{ forloop.counter0 }}-id" value="{{ form.id.value|default:'' }}">
+                                                <input type="hidden" name="order_services-{{ forloop.counter0 }}-DELETE" value="{% if form.DELETE.value %}on{% endif %}">
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <button type="button" class="btn btn-outline-primary mt-3" id="add-service">
+                                    <i class="fas fa-plus me-2"></i>{% trans "Add Service" %}
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Description & Notes -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-transparent">
+                                <h3 class="h5 mb-0">{% trans "Description & Notes" %}</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">{% trans "Description" %}</label>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.description.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="mb-3">
+                                    <label for="{{ form.notes.id_for_label }}" class="form-label">{% trans "Notes" %}</label>
+                                    {{ form.notes }}
+                                    {% if form.notes.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.notes.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status & Assignee -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-transparent">
+                                <h3 class="h5 mb-0">{% trans "Status & Assignee" %}</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="{{ form.status.id_for_label }}" class="form-label required">{% trans "Status" %}</label>
+                                    {{ form.status }}
+                                    {% if form.status.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.status.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="mb-3">
+                                    <label for="{{ form.assigned_to.id_for_label }}" class="form-label">{% trans "Assigned To" %}</label>
+                                    {{ form.assigned_to }}
+                                    {% if form.assigned_to.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.assigned_to.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                {% if form.instance.pk %}{% trans "Update Order" %}{% else %}{% trans "Create Order" %}{% endif %}
+                            </button>
+                            <a href="{% url 'service:repair-order-list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const clientSelect = document.getElementById('{{ form.client.id_for_label }}');
+    const deviceSelect = document.getElementById('{{ form.device.id_for_label }}');
+    const servicesSelect = document.getElementById('{{ form.services.id_for_label }}');
+
+    // Function to load devices for selected client
+    function loadDevices() {
+        const clientId = clientSelect.value;
+        if (!clientId) {
+            deviceSelect.innerHTML = '<option value="">{% trans "Select a client first" %}</option>';
+            return;
+        }
+
+        fetch(`/service/public/clients/${clientId}/devices/`)
+            .then(response => response.json())
+            .then(data => {
+                deviceSelect.innerHTML = '<option value="">{% trans "Select a device" %}</option>';
+                data.forEach(device => {
+                    const option = document.createElement('option');
+                    option.value = device.id;
+                    option.textContent = `${device.brand} ${device.model}`;
+                    deviceSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading devices:', error);
+                deviceSelect.innerHTML = '<option value="">{% trans "Error loading devices" %}</option>';
+            });
+    }
+
+    // Load devices when client changes
+    if (!clientSelect.disabled) {
+        clientSelect.addEventListener('change', loadDevices);
+    }
+
+    // Initialize devices if client is pre-selected and not disabled
+    if (clientSelect.value && !clientSelect.disabled) {
+        loadDevices();
+    }
+
+    // --- Dynamic Service Formset Logic ---
+    const container = document.getElementById('services-container');
+    const addButton = document.getElementById('add-service');
+    const totalForms = document.getElementById('id_order_services-TOTAL_FORMS');
+    let formCount = parseInt(totalForms.value);
+
+    function updateFormIndices() {
+        const forms = container.getElementsByClassName('service-form');
+        for (let i = 0; i < forms.length; i++) {
+            const form = forms[i];
+            form.querySelectorAll('[name*="order_services-"]').forEach(input => {
+                input.name = input.name.replace(/order_services-\d+/, `order_services-${i}`);
+                input.id = input.id.replace(/order_services-\d+/, `order_services-${i}`);
+            });
+        }
+        totalForms.value = forms.length;
+    }
+
+    function addServiceForm() {
+        const newForm = document.createElement('div');
+        newForm.className = 'card mb-3 service-form';
+        newForm.innerHTML = `
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-10">
+                        <label class="form-label required">{% trans "Service" %}</label>
+                        <select name="order_services-${formCount}-service" id="id_order_services-${formCount}-service" class="form-control">
+                            {% for value, label in formset.empty_form.service.field.choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-danger d-block w-100 remove-service" title="{% trans 'Remove Service' %}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <input type="hidden" name="order_services-${formCount}-id" value="">
+                <input type="hidden" name="order_services-${formCount}-DELETE" value="">
+            </div>
+        `;
+        newForm.querySelector('.remove-service').addEventListener('click', removeServiceForm);
+        container.appendChild(newForm);
+        formCount++;
+        totalForms.value = formCount;
+    }
+
+    function removeServiceForm(e) {
+        const form = e.target.closest('.service-form');
+        form.remove();
+        updateFormIndices();
+    }
+
+    addButton.addEventListener('click', addServiceForm);
+    document.querySelectorAll('.remove-service').forEach(button => {
+        button.addEventListener('click', removeServiceForm);
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 

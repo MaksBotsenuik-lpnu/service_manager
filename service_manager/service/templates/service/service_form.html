@@ -1,0 +1,316 @@
+{% extends 'service/base.html' %}
+{% load i18n %}
+
+{% block page_title %}
+    {% if form.instance.pk %}
+        {% trans "Edit Service" %}
+    {% else %}
+        {% trans "New Service" %}
+    {% endif %}
+{% endblock %}
+
+{% block service_content %}
+<div class="container-fluid px-0">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-transparent">
+                    <h2 class="h4 mb-0">
+                        {% if form.instance.pk %}
+                            {% trans "Edit Service" %}
+                        {% else %}
+                            {% trans "New Service" %}
+                        {% endif %}
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <!-- Basic Information -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-transparent">
+                                <h3 class="h5 mb-0">{% trans "Basic Information" %}</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="{{ form.name.id_for_label }}" class="form-label required">{% trans "Service Name" %}</label>
+                                    {{ form.name }}
+                                    {% if form.name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.name.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.service_type.id_for_label }}" class="form-label required">{% trans "Service Type" %}</label>
+                                    {{ form.service_type }}
+                                    {% if form.service_type.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.service_type.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">{% trans "Description" %}</label>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.description.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-check mb-3">
+                                    {{ form.is_active }}
+                                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">{% trans "Is Active" %}</label>
+                                    {% if form.is_active.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.is_active.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing and Time -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-transparent">
+                                <h3 class="h5 mb-0">{% trans "Pricing and Time" %}</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.price.id_for_label }}" class="form-label required">{% trans "Price" %}</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                {{ form.price }}
+                                            </div>
+                                            {% if form.price.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.price.errors %}
+                                                        {{ error }}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.estimated_time.id_for_label }}" class="form-label required">{% trans "Estimated Time" %}</label>
+                                            <div class="input-group">
+                                                {{ form.estimated_time }}
+                                                <span class="input-group-text">{% trans "hours" %}</span>
+                                            </div>
+                                            {% if form.estimated_time.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.estimated_time.errors %}
+                                                        {{ error }}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Required Parts -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-transparent">
+                                <h3 class="h5 mb-0">{% trans "Required Parts" %}</h3>
+                            </div>
+                            <div class="card-body">
+                                {{ formset.management_form }}
+                                <div id="parts-container">
+                                    {% for form in formset %}
+                                        <div class="card mb-3 part-form">
+                                            <div class="card-body">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label required">{% trans "Part" %}</label>
+                                                        <select name="service_parts-{{ forloop.counter0 }}-part" id="id_service_parts-{{ forloop.counter0 }}-part" class="form-control">
+                                                            {% for value, label in form.part.field.choices %}
+                                                                <option value="{{ value }}" {% if form.part.value == value %}selected{% endif %}>{{ label }}</option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        {% if form.part.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {% for error in form.part.errors %}{{ error }}{% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label required">{% trans "Amount" %}</label>
+                                                        <input type="number" name="service_parts-{{ forloop.counter0 }}-part_amount" id="id_service_parts-{{ forloop.counter0 }}-part_amount" min="1" class="form-control" value="{{ form.part_amount.value|default_if_none:'' }}">
+                                                        {% if form.part_amount.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {% for error in form.part_amount.errors %}{{ error }}{% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                    <div class="col-md-2">
+                                                        <label class="form-label">&nbsp;</label>
+                                                        <button type="button" class="btn btn-danger d-block w-100 remove-part" title="{% trans 'Remove Part' %}">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <input type="hidden" name="service_parts-{{ forloop.counter0 }}-id" value="{{ form.id.value|default:'' }}">
+                                                <input type="hidden" name="service_parts-{{ forloop.counter0 }}-DELETE" value="{% if form.DELETE.value %}on{% endif %}">
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <button type="button" class="btn btn-outline-primary mt-3" id="add-part">
+                                    <i class="fas fa-plus me-2"></i>{% trans "Add Part" %}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                {% if form.instance.pk %}
+                                    {% trans "Update Service" %}
+                                {% else %}
+                                    {% trans "Create Service" %}
+                                {% endif %}
+                            </button>
+                            <a href="{% url 'service:service-list' %}" class="btn btn-secondary">
+                                {% trans "Cancel" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_css %}
+<style>
+    .required:after {
+        content: " *";
+        color: #dc3545;
+    }
+    .form-control:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    .form-text {
+        font-size: 0.875em;
+        color: #6c757d;
+    }
+    .invalid-feedback {
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+    .card {
+        border: 1px solid rgba(0,0,0,.125);
+        border-radius: 0.25rem;
+    }
+    .card-header {
+        background-color: rgba(0,0,0,.03);
+        border-bottom: 1px solid rgba(0,0,0,.125);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('parts-container');
+    const addButton = document.getElementById('add-part');
+    const totalForms = document.getElementById('id_service_parts-TOTAL_FORMS');
+    let formCount = parseInt(totalForms.value);
+
+    // Function to update form indices
+    function updateFormIndices() {
+        const forms = container.getElementsByClassName('part-form');
+        for (let i = 0; i < forms.length; i++) {
+            const form = forms[i];
+            form.querySelectorAll('[name*="service_parts-"]').forEach(input => {
+                input.name = input.name.replace(/service_parts-\d+/, `service_parts-${i}`);
+                input.id = input.id.replace(/service_parts-\d+/, `service_parts-${i}`);
+            });
+        }
+        totalForms.value = forms.length;
+    }
+
+    // Function to add new part form
+    function addPartForm() {
+        const newForm = document.createElement('div');
+        newForm.className = 'card mb-3 part-form';
+        newForm.innerHTML = `
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label required">{% trans "Part" %}</label>
+                        <select name="service_parts-${formCount}-part" id="id_service_parts-${formCount}-part" class="form-control">
+                            {% for value, label in formset.empty_form.part.field.choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label required">{% trans "Amount" %}</label>
+                        <input type="number" name="service_parts-${formCount}-part_amount" id="id_service_parts-${formCount}-part_amount" min="1" class="form-control" value="">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="button" class="btn btn-danger d-block w-100 remove-part" title="{% trans 'Remove Part' %}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <input type="hidden" name="service_parts-${formCount}-id" value="">
+                <input type="hidden" name="service_parts-${formCount}-DELETE" value="">
+            </div>
+        `;
+        
+        // Add remove handler
+        newForm.querySelector('.remove-part').addEventListener('click', removePartForm);
+        
+        // Append to container
+        container.appendChild(newForm);
+        
+        // Update form count
+        formCount++;
+        totalForms.value = formCount;
+    }
+
+    // Function to remove part form
+    function removePartForm(e) {
+        const form = e.target.closest('.part-form');
+        form.remove();
+        updateFormIndices();
+    }
+
+    // Add event listeners
+    addButton.addEventListener('click', addPartForm);
+    document.querySelectorAll('.remove-part').forEach(button => {
+        button.addEventListener('click', removePartForm);
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 

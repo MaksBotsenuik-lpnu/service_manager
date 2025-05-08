@@ -1,0 +1,111 @@
+{% extends 'service/base.html' %}
+{% load i18n %}
+{% load multiply %}
+
+{% block page_title %}{% trans "Service Details" %}: {{ service.name }}{% endblock %}
+
+{% block page_actions %}
+<div class="btn-toolbar mb-2 mb-md-0">
+    <div class="btn-group me-2">
+        <a href="{% url 'service:service-update' service.pk %}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> {% trans "Edit Service" %}
+        </a>
+        <a href="{% url 'service:service-delete' service.pk %}" class="btn btn-danger">
+            <i class="fas fa-trash"></i> {% trans "Delete Service" %}
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block service_content %}
+<div class="container-fluid px-0">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-transparent">
+                    <h2 class="h4 mb-0">{{ service.name }}</h2>
+                    <p class="text-muted mb-0">{{ service.get_service_type_display }}</p>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3 text-muted">{% trans "Price" %}</dt>
+                        <dd class="col-sm-9">${{ service.price }}</dd>
+                        
+                        <dt class="col-sm-3 text-muted">{% trans "Estimated Time" %}</dt>
+                        <dd class="col-sm-9">{{ service.estimated_time }}</dd>
+                        
+                        <dt class="col-sm-3 text-muted">{% trans "Status" %}</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge bg-{{ service.is_active|yesno:'success,danger' }}">
+                                {{ service.is_active|yesno:_('Active,Inactive') }}
+                            </span>
+                        </dd>
+                        
+                        <dt class="col-sm-3 text-muted">{% trans "Description" %}</dt>
+                        <dd class="col-sm-9">{{ service.description|linebreaks|default:"—" }}</dd>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header bg-transparent">
+                    <h3 class="h5 mb-0">{% trans "Required Parts" %}</h3>
+                </div>
+                <div class="card-body">
+                    {% if service.service_parts.exists %}
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>{% trans "Part" %}</th>
+                                        <th class="text-end">{% trans "Amount" %}</th>
+                                        <th class="text-end">{% trans "Price" %}</th>
+                                        <th class="text-end">{% trans "Total" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for service_part in service.service_parts.all %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'service:part-detail' service_part.part.id %}" class="text-decoration-none">
+                                                {{ service_part.part.name }}
+                                            </a>
+                                        </td>
+                                        <td class="text-end">{{ service_part.part_amount }}</td>
+                                        <td class="text-end">${{ service_part.part.price }}</td>
+                                        <td class="text-end">${{ service_part.part.price|multiply:service_part.part_amount }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-box-open fa-2x mb-3"></i>
+                            <p class="mb-0">{% trans "No parts required for this service." %}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-transparent">
+                    <h3 class="h5 mb-0">{% trans "Actions" %}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'service:service-update' service.id %}" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>{% trans "Edit Service" %}
+                        </a>
+                        <a href="{% url 'service:service-delete' service.id %}" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>{% trans "Delete Service" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
