@@ -10,11 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
-from datetime import timedelta
 from pathlib import Path
+from dotenv import load_dotenv
 
-
-
+# Load environment variables from .env file
+load_dotenv()
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,12 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=g$2l%5930v!$lsj5dct_a2o5h0za6-@q$i7t(4-m1_c5gsa2h'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-=g$2l%5930v!$lsj5dct_a2o5h0za6-@q$i7t(4-m1_c5gsa2h')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 
 # Application definition
@@ -88,12 +88,12 @@ WSGI_APPLICATION = 'service_manager.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'computer_service',
-        'USER': 'postgres',
-        'PASSWORD': 'qweasdzxc123',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', 'computer_service'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'qweasdzxc123'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
 
@@ -132,11 +132,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = os.getenv('STATIC_URL', 'static/')
 STATICFILES_DIRS = [
     BASE_DIR / 'authenticate' / 'static',
 ]
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATIC_ROOT = BASE_DIR / os.getenv('STATIC_ROOT', 'staticfiles')
 
 AUTH_USER_MODEL = 'authenticate.User'
 
@@ -152,6 +152,14 @@ LOGIN_URL = 'auth:login'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 
 # REST Framework settings
 REST_FRAMEWORK = {
@@ -188,19 +196,19 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'file': {
-            'level': 'DEBUG',
+            'level': os.getenv('LOG_LEVEL', 'DEBUG'),
             'class': 'logging.FileHandler',
-            'filename': 'debug.log',
+            'filename': os.getenv('LOG_FILE', 'debug.log'),
         },
         'console': {
-            'level': 'DEBUG',
+            'level': os.getenv('LOG_LEVEL', 'DEBUG'),
             'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
         'service': {
             'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+            'level': os.getenv('LOG_LEVEL', 'DEBUG'),
             'propagate': True,
         },
     },

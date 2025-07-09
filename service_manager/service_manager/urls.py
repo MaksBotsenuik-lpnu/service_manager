@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.shortcuts import redirect
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -25,6 +26,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path('', lambda request: redirect('auth/login/', permanent=True), name='start_point'),
     path('admin/', admin.site.urls),
     path('auth/', include('authenticate.urls')),  # Authentication URLs (login, register, etc.)
     path('logs/', include('logs.urls')),     # Logs URLs
